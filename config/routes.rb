@@ -75,11 +75,11 @@ def rb_common_routes(rb)
                :to => 'rb_master_backlogs#menu', :via => [:get]
   rb_match rb, 'master_backlog/:project_id/closed_sprints', :to => 'rb_master_backlogs#closed_sprints', :via => [:get]
 
-  rb_match rb, 'impediment/create', :to => 'rb_impediments#create', :via => [:get]
-  rb_match rb, 'impediment/update/:id', :to => 'rb_impediments#update', :via => [:get]
+  rb_match rb, 'impediment/create', :to => 'rb_impediments#create', :via => [:post]
+  rb_match rb, 'impediment/update/:id', :to => 'rb_impediments#update', :via => [:post]
 
-  rb_match rb, 'sprint/create', :to => 'rb_sprints#create', :via => [:get]
-  rb_match rb, 'sprint/:sprint_id/update', :to => 'rb_sprints#update', :via => [:get]
+  rb_match rb, 'sprint/create', :to => 'rb_sprints#create', :via => [:post]
+  rb_match rb, 'sprint/:sprint_id/update', :to => 'rb_sprints#update', :via => [:put]
   rb_match rb, 'sprint/:sprint_id/close', :to => 'rb_sprints#close', :via => [:get]
   rb_match rb, 'sprint/:sprint_id/reset', :to => 'rb_sprints#reset', :via => [:get]
   rb_match rb, 'sprint/download/:sprint_id.xml', :to => 'rb_sprints#download', :format => 'xml', :via => [:get]
@@ -87,8 +87,8 @@ def rb_common_routes(rb)
 
   rb_match rb, 'stories/:project_id/:sprint_id.pdf', :to => 'rb_stories#index', :format => 'pdf', :via => [:get]
   rb_match rb, 'stories/:project_id.pdf', :to => 'rb_stories#index', :format => 'pdf', :via => [:get]
-  rb_match rb, 'story/create', :to => 'rb_stories#create', :via => [:get]
-  rb_match rb, 'story/update/:id', :to => 'rb_stories#update', :via => [:get]
+  rb_match rb, 'story/create', :to => 'rb_stories#create', :via => [:post]
+  rb_match rb, 'story/update/:id', :to => 'rb_stories#update', :via => [:put, :post]
   rb_match rb, 'story/:id/tooltip', :to => 'rb_stories#tooltip', :via => [:get]
 
   rb_match rb, 'calendar/:key/:project_id.ics', :to => 'rb_calendars#ical',
