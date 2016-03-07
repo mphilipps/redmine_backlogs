@@ -116,7 +116,6 @@ module Backlogs
             self.fixed_version = self.story.fixed_version if self.story
             self.start_date = Date.today if self.start_date.blank? && self.status_id != IssueStatus.default.id
 
-            self.tracker = Tracker.find(RbTask.tracker) unless self.tracker_id == RbTask.tracker
           elsif self.is_story? && Backlogs.setting[:set_start_and_duedates_from_sprint]
             if self.fixed_version
               self.start_date ||= (self.fixed_version.sprint_start_date || Date.today)
@@ -150,9 +149,9 @@ module Backlogs
       def backlogs_after_save
         self.history.save!
         self.invalidate_release_burnchart_data
-
         [self.parent_id, self.parent_id_was].compact.uniq.each{|pid|
           p = Issue.find(pid)
+
           r = p.leaves.sum("COALESCE(remaining_hours, 0)").to_f
           if r != p.remaining_hours
             p.update_attribute(:remaining_hours, r)
@@ -178,14 +177,21 @@ module Backlogs
                                           )", self.root_id, self.lft, self.rgt,
                                               self.fixed_version_id, self.fixed_version_id,
                                               self.fixed_version_id, self.fixed_version_id,
-                                              RbTask.tracker]).to_a
+                                              self.tracker]).to_a
           tasklist.each{|task| task.history.save! }
           if tasklist.size > 0
             task_ids = '(' + tasklist.collect{|task| connection.quote(task.id)}.join(',') + ')'
             connection.execute("update issues set
-                                updated_on = #{connection.quote(self.updated_on)}, fixed_version_id = #{connection.quote(self.fixed_version_id)}, tracker_id = #{RbTask.tracker}
+                                updated_on = #{connection.quote(self.updated_on)}, fixed_version_id = #{connection.quote(self.fixed_version_id)}, tracker_id = #{self.tracker_id}
                                 where id in #{task_ids}")
           end
+        end
+        # update tracker type of task to data base
+        if !Rails.cache.read('issue_id').nil?
+          connection.execute("update issues set
+                                updated_on = #{connection.quote(self.updated_on)}, tracker_id = #{Rails.cache.read('tracker_id')}
+                                where id =#{Rails.cache.read('issue_id')} ")
+          Rails.cache.clear
         end
       end
 
