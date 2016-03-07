@@ -21,8 +21,8 @@ module Backlogs
 
         safe_attributes 'release_id','release_relationship' #FIXME merge conflict. is this required?
 
-        before_save :backlogs_before_save
-        after_save  :backlogs_after_save
+       # before_save :backlogs_before_save
+       # after_save  :backlogs_after_save
 
         include Backlogs::ActiveRecord::Attributes
       end
@@ -116,6 +116,7 @@ module Backlogs
             self.fixed_version = self.story.fixed_version if self.story
             self.start_date = Date.today if self.start_date.blank? && self.status_id != IssueStatus.default.id
 
+            self.tracker = Tracker.find(RbTask.tracker) unless self.tracker_id == RbTask.tracker
           elsif self.is_story? && Backlogs.setting[:set_start_and_duedates_from_sprint]
             if self.fixed_version
               self.start_date ||= (self.fixed_version.sprint_start_date || Date.today)
@@ -177,21 +178,14 @@ module Backlogs
                                           )", self.root_id, self.lft, self.rgt,
                                               self.fixed_version_id, self.fixed_version_id,
                                               self.fixed_version_id, self.fixed_version_id,
-                                              self.tracker]).to_a
+                                              RbTask.tracker]).to_a
           tasklist.each{|task| task.history.save! }
           if tasklist.size > 0
             task_ids = '(' + tasklist.collect{|task| connection.quote(task.id)}.join(',') + ')'
             connection.execute("update issues set
-                                updated_on = #{connection.quote(self.updated_on)}, fixed_version_id = #{connection.quote(self.fixed_version_id)}, tracker_id = #{self.tracker_id}
+                                updated_on = #{connection.quote(self.updated_on)}, fixed_version_id = #{connection.quote(self.fixed_version_id)}, tracker_id = #{RbTask.tracker}
                                 where id in #{task_ids}")
           end
-        end
-        # update tracker type of task to data base
-        if !Rails.cache.read('issue_id').nil?
-          connection.execute("update issues set
-                                updated_on = #{connection.quote(self.updated_on)}, tracker_id = #{Rails.cache.read('tracker_id')}
-                                where id =#{Rails.cache.read('issue_id')} ")
-          Rails.cache.clear
         end
       end
 
