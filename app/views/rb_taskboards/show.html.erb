@@ -154,6 +154,12 @@
     <option value="" color="#AAAAAA" color_light="#E0E0E0"> </option>
     <%= users_assignable_options_for_select(@project.assignable_users) %>
   </select>
+  <select class="task_type template" id="task_type_options">
+      <% trackers= task_types_assignable_to_project(@project.id) %>
+      <% trackers.each do |item| %>
+          <option value = "<%= item[0] %>"> <%= item[1] %> </option>
+      <% end %>
+  </select>
   <div id="task_template">
     <%= render :partial => "rb_tasks/task", :object => RbTask.new %>
   </div>

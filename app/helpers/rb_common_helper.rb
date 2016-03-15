@@ -279,4 +279,11 @@ filter:progid:DXImageTransform.Microsoft.Gradient(Enabled=1,GradientType=0,Start
       Redmine::Utils.relative_url_root #actionpack-3* is not???
     end
   end
+
+ #get all the task types assigned to a project
+  def task_types_assignable_to_project(project_id)
+    connection = ActiveRecord::Base.connection
+    results = connection.execute("select trackers.id,name from projects_trackers,trackers where projects_trackers.project_id= #{project_id}
+                                and projects_trackers.tracker_id=trackers.id")
+  end
 end
