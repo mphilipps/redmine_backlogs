@@ -21,8 +21,8 @@ module Backlogs
 
         safe_attributes 'release_id','release_relationship' #FIXME merge conflict. is this required?
 
-       # before_save :backlogs_before_save
-       # after_save  :backlogs_after_save
+        before_save :backlogs_before_save
+        after_save  :backlogs_after_save
 
         include Backlogs::ActiveRecord::Attributes
       end
@@ -116,7 +116,6 @@ module Backlogs
             self.fixed_version = self.story.fixed_version if self.story
             self.start_date = Date.today if self.start_date.blank? && self.status_id != IssueStatus.default.id
 
-            self.tracker = Tracker.find(RbTask.tracker) unless self.tracker_id == RbTask.tracker
           elsif self.is_story? && Backlogs.setting[:set_start_and_duedates_from_sprint]
             if self.fixed_version
               self.start_date ||= (self.fixed_version.sprint_start_date || Date.today)
@@ -150,6 +149,7 @@ module Backlogs
       def backlogs_after_save
         self.history.save!
         self.invalidate_release_burnchart_data
+
         [self.parent_id, self.parent_id_was].compact.uniq.each{|pid|
           p = Issue.find(pid)
 
@@ -183,7 +183,7 @@ module Backlogs
           if tasklist.size > 0
             task_ids = '(' + tasklist.collect{|task| connection.quote(task.id)}.join(',') + ')'
             connection.execute("update issues set
-                                updated_on = #{connection.quote(self.updated_on)}, fixed_version_id = #{connection.quote(self.fixed_version_id)}, tracker_id = #{RbTask.tracker}
+                                updated_on = #{connection.quote(self.updated_on)}, fixed_version_id = #{connection.quote(self.fixed_version_id)}
                                 where id in #{task_ids}")
           end
         end
