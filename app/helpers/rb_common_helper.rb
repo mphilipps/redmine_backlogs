@@ -280,10 +280,24 @@ filter:progid:DXImageTransform.Microsoft.Gradient(Enabled=1,GradientType=0,Start
     end
   end
 
- #get all the task types assigned to a project
-  def task_types_assignable_to_project(project_id)
+  #get all the tracker types assigned to a project
+  def trackers_assignable_to_project(project_id)
     connection = ActiveRecord::Base.connection
-    results = connection.execute("select trackers.id,name from projects_trackers,trackers where projects_trackers.project_id= #{project_id}
+    results = connection.execute("select trackers.id,trackers.name from projects_trackers,trackers where projects_trackers.project_id= #{project_id}
                                 and projects_trackers.tracker_id=trackers.id")
   end
+
+  #get tracker by name method to get get tracker details
+  def getTrackerByName(tracker_name)
+    tracker_name =  tracker_name.to_s
+    tracker = 0
+    unless tracker_name.nil?
+      tracker = Tracker.where(:name => tracker_name).first
+      unless tracker.nil?
+        tracker = tracker.id
+      end
+    end
+    tracker
+  end
+
 end
