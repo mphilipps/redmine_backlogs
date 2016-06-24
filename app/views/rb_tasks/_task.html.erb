@@ -7,10 +7,6 @@
     <div class="v"><%= id_or_empty(task) %></div>
   </div>
   <div class="subject editable" fieldtype="textarea" fieldname="subject" fieldlabel="<%=l(:field_subject)%>"><%= h task.subject %></div>
-  <div class="tracker_id editable" style="display: none" fieldtype="select" fieldname="tracker_id" fieldlabel="<%=l(:field_task_type)%>">
-      <div class="t"><%= h task.tracker %></div>
-      <div class="v"><%= getTrackerByName(task.tracker) %></div>
-  </div>
   <div class="description editable" style="display: none" fieldtype="textarea" fieldname="description" fieldlabel="<%=l(:field_description)%>"><%= h task.description %></div>
   <div class="assigned_to_id editable" fieldtype="select" fieldname="assigned_to_id" fieldlabel="<%=l(:field_assigned_to)%>">
     <div class="t"><%= assignee_name_or_empty(task) %></div>
@@ -42,7 +38,7 @@
     <div class="project_id"><%= task.project_id %></div>
     <div class="user_status"><%= task.author == User.current ? '+' : '-' %>c<%= task.assigned_to == User.current ? '+' : '-' %>a</div>
     <div class="tracker_id"><%= tracker_id_or_empty(task) %></div>
-    <div class="previous"><%= task.right_sibling.blank? ? '' : task.right_sibling.id %></div>
+    <%# <div class="previous"><%= task.right_sibling.blank? ? '' : task.right_sibling.id %1></div> %>
     <%= render :partial => "backlogs/model_errors", :object => task.errors unless task.errors.empty? %>
   </div>
 </div>

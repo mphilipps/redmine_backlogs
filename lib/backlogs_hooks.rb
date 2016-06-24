@@ -179,11 +179,11 @@ module BacklogsPlugin
             snippet += "#{radio_button_tag('copy_tasks', 'all:' + params[:copy_from], false)} #{l(:rb_label_copy_tasks_all)}</p>"
           end
 
-
-          snippet += "<p><label for='remaining_hours'>#{l(:field_remaining_hours)}</label>"
-          snippet += text_field_tag('remaining_hours', issue.remaining_hours, :size => 3)
-          snippet += '</p>'
-
+          if issue.is_task? && !issue.new_record?
+            snippet += "<p><label for='remaining_hours'>#{l(:field_remaining_hours)}</label>"
+            snippet += text_field_tag('remaining_hours', issue.remaining_hours, :size => 3)
+            snippet += '</p>'
+          end
 
           return snippet
         rescue => e
@@ -362,7 +362,7 @@ module BacklogsPlugin
         params = context[:params]
         issue = context[:issue]
 
-        if params.include?(:remaining_hours)
+        if issue.is_task? && params.include?(:remaining_hours)
           begin
             issue.remaining_hours = Float(params[:remaining_hours])
           rescue ArgumentError, TypeError
