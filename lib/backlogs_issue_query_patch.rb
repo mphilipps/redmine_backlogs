@@ -139,7 +139,7 @@ module Backlogs
       
       private
       def show_backlogs_issue_items?(project)
-        !project.nil? and project.module_enabled?('backlogs')
+        project.nil? or project.module_enabled?('backlogs')
       end
     end
 
