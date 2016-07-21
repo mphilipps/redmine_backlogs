@@ -58,7 +58,7 @@
 <%- end %>
 
 <%- content_for :view_specific_links do %>
-
+  
   <span id="sprintestimatedhours">(<%= @sprint.estimated_hours.to_f %> estimated <%= l(:label_hours) %>)</span>
   <% if @sprint.has_burndown? %>
     <a id='show_charts'><%= l(:label_burndown) %></a>
@@ -104,7 +104,7 @@
     <%- @sprint.stories.each do |story| %>
     <tr id="swimlane-<%= story.id %>" class="story-swimlane">
       <td>
-        <div class="story <%= mark_if_closed(story) %>" <%= build_inline_style(story).html_safe %>>
+        <div class="story <%= mark_if_closed(story) %> tracker<%= story ? story.tracker_id : '' %>" <%= build_inline_style(story).html_safe %>>
           <div class="id story_tooltip_ajax">
             <div class="tooltip_text"></div>
             <%= link_to story.id, {:controller => 'issues', :action => 'show', :id => story.id}, { :target => "_blank" } %>
