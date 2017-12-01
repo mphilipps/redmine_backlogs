@@ -82,7 +82,7 @@ class RbStory < Issue
     else #product backlog
       Backlogs::ActiveRecord.add_condition(options, self.__find_options_pbl_condition(project_id))
       options[:joins] ||= []
-      options[:joins] [options[:joins]] unless options[:joins].is_a?(Array)
+      options[:joins] << [options[:joins]] unless options[:joins].is_a?(Array)
       options[:joins] << :status
       options[:joins] << :project
     end
@@ -191,7 +191,7 @@ class RbStory < Issue
       trackers = [] if trackers.blank?
     end
 
-    trackers = Tracker.find_all_by_id(trackers)
+    trackers = Tracker.where(id: trackers)
     trackers = trackers & options[:project].trackers if options[:project]
     trackers = trackers.sort_by { |t| [t.position] }
 

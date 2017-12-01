@@ -63,7 +63,7 @@ class ReleaseBurndown
                .order(:day).group(:day).sum(:closed_points)
 
     # Series collected, now format data for jqplot
-    # Slightly hacky formatting to get the correct view. Might change when this jqplot issue is 
+    # Slightly hacky formatting to get the correct view. Might change when this jqplot issue is
     # sorted out:
     # See https://bitbucket.org/cleonello/jqplot/issue/181/nagative-values-in-stacked-bar-chart
     @data[:closed_points] = closed.values
@@ -171,8 +171,8 @@ class RbRelease < ActiveRecord::Base
   validates_length_of :name, :maximum => 64
   validate :dates_valid?
 
-  scope :open, :conditions => {:status => 'open'}
-  scope :closed, :conditions => {:status => 'closed'}
+  scope :open, -> { where(:status => 'open') }
+  scope :closed, -> { where(:status => 'closed') }
   scope :visible, lambda {|*args| { :include => :project,
                                     :conditions => Project.allowed_to_condition(args.first || User.current, :view_releases) } }
 
