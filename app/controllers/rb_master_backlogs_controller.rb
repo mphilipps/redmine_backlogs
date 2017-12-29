@@ -11,6 +11,7 @@ class RbMasterBacklogsController < RbApplicationController
     sprints = @project.open_shared_sprints
     @sprint_backlogs = RbStory.backlogs_by_sprint(@project, sprints)
 
+
     releases = @project.open_releases_by_date
     @release_backlogs = RbStory.backlogs_by_release(@project, releases)
 
@@ -100,7 +101,7 @@ class RbMasterBacklogsController < RbApplicationController
              } if @release
     links << {:label => l(:label_sprint_close),
               :url => url_for(:controller => 'rb_sprints', :action => 'close', :sprint_id => @sprint, :only_path => true)
-              } if @sprint && @sprint.open? && @sprint.stories.open.none? && User.current.allowed_to?(:update_sprints, @project)        
+              } if @sprint && @sprint.open? && @sprint.stories.open.none? && User.current.allowed_to?(:update_sprints, @project)
 
 
     respond_to do |format|

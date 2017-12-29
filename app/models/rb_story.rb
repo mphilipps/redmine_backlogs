@@ -87,10 +87,11 @@ class RbStory < Issue
       options[:joins] << :project
     end
 
-    options
+    joins(options[:joins]).
+    where(options[:conditions])
   end
 
-  scope :backlog_scope, lambda{|opts| RbStory.find_options(opts) }
+  scope :backlog_scope, ->(opts) { RbStory.find_options(opts) }
 
   def self.inject_lower_higher
     prev = nil
@@ -161,8 +162,8 @@ class RbStory < Issue
     return s
   end
 
-  scope :updated_since, lambda {|since|
-          where(["#{self.table_name}.updated_on > ?", Time.parse(since)]).
+  scope :updated_since, ->(since) {
+          where("#{self.table_name}.updated_on > ?", Time.parse(since)).
           order("#{self.table_name}.updated_on ASC")
         }
 
