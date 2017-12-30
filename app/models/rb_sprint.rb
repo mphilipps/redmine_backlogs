@@ -38,14 +38,15 @@ class RbSprint < Version
         r = self.project.root? ? self.project : self.project.root
         # Project used for other sharings
         p = self.project
-        Project.visible.scoped(:include => :versions,
-          :conditions => ["#{Version.table_name}.id = #{id}" +
+        Project.visible.includes(:versions).references(:versions).
+          where("#{Version.table_name}.id = #{id}" +
           " OR (#{Project.table_name}.status <> #{Project::STATUS_ARCHIVED} AND (" +
           " 'system' = ? " +
           " OR (#{Project.table_name}.lft >= #{r.lft} AND #{Project.table_name}.rgt <= #{r.rgt} AND ? = 'tree')" +
           " OR (#{Project.table_name}.lft > #{p.lft} AND #{Project.table_name}.rgt < #{p.rgt} AND ? IN ('hierarchy', 'descendants'))" +
           " OR (#{Project.table_name}.lft < #{p.lft} AND #{Project.table_name}.rgt > #{p.rgt} AND ? = 'hierarchy')" +
-          "))",sharing,sharing,sharing,sharing]).order('lft')
+          "))",sharing,sharing,sharing,sharing).
+          order('lft')
       end
     @shared_projects
   end
@@ -135,8 +136,7 @@ class RbSprint < Version
   end
 
   def impediments
-    @impediments ||= Issue.find(:all,
-      :conditions => ["id in (
+    @impediments ||= Issue.where("id in (
               select issue_from_id
               from issue_relations ir
               join issues blocked
@@ -146,7 +146,7 @@ class RbSprint < Version
               where ir.relation_type = 'blocks'
               )",
             RbStory.trackers + [RbTask.tracker],
-            self.id]
-      ) #.sort {|a,b| a.closed? == b.closed? ?  a.updated_on <=> b.updated_on : (a.closed? ? 1 : -1) }
+            self.id)
+      #.sort {|a,b| a.closed? == b.closed? ?  a.updated_on <=> b.updated_on : (a.closed? ? 1 : -1) }
   end
 end

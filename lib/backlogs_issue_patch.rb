@@ -47,7 +47,7 @@ module Backlogs
       def is_task?
         return (tracker_id == RbTask.tracker)
       end
-      
+
       def backlogs_issue_type
         return "story" if self.is_story?
         return "impediment" if self.blocks(true).any?
@@ -71,7 +71,7 @@ module Backlogs
               @rb_story = parent.story
             end
           else
-            @rb_story = Issue.find(:first, :order => 'lft DESC', :conditions => [ "root_id = ? and lft < ? and rgt > ? and tracker_id in (?)", root_id, lft, rgt, RbStory.trackers ])
+            @rb_story = Issue.order('lft DESC').where("root_id = ? and lft < ? and rgt > ? and tracker_id in (?)", root_id, lft, rgt, RbStory.trackers).first
             @rb_story = @rb_story.becomes(RbStory) if @rb_story
           end
         end
@@ -166,7 +166,7 @@ module Backlogs
           # raw sql and manual journal here because not
           # doing so causes an update loop when Issue calls
           # update_parent :<
-          tasklist = RbTask.find(:all, :conditions => ["root_id=? and lft>? and rgt<? and
+          tasklist = RbTask.where("root_id=? and lft>? and rgt<? and
                                           (
                                             (? is NULL and not fixed_version_id is NULL)
                                             or
@@ -178,7 +178,7 @@ module Backlogs
                                           )", self.root_id, self.lft, self.rgt,
                                               self.fixed_version_id, self.fixed_version_id,
                                               self.fixed_version_id, self.fixed_version_id,
-                                              RbTask.tracker]).to_a
+                                              RbTask.tracker).to_a
           tasklist.each{|task| task.history.save! }
           if tasklist.size > 0
             task_ids = '(' + tasklist.collect{|task| connection.quote(task.id)}.join(',') + ')'

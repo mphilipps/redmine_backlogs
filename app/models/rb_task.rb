@@ -20,7 +20,7 @@ class RbTask < Issue
       safe_attributes_names = RbTask::SAFE_ATTRIBUTES
     else
       safe_attributes_names = Issue.new(
-        :project_id=>params[:project_id] # required to verify "safeness"
+        :project_id => params[:project_id] # required to verify "safeness"
       ).safe_attribute_names
     end
     attribs = params.select {|k,v| safe_attributes_names.include?(k) }
@@ -70,13 +70,11 @@ class RbTask < Issue
   def self.find_all_updated_since(since, project_id, find_impediments = false, sprint_id = nil)
     #find all updated visible on taskboard - which may span projects.
     if sprint_id.nil?
-      find(:all,
-           :conditions => ["project_id = ? AND updated_on > ? AND tracker_id in (?) and parent_id IS #{ find_impediments ? '' : 'NOT' } NULL", project_id, Time.parse(since), tracker],
-           :order => "updated_on ASC")
+      where("project_id = ? AND updated_on > ? AND tracker_id in (?) and parent_id IS #{ find_impediments ? '' : 'NOT' } NULL", project_id, Time.parse(since), tracker).
+      order("updated_on ASC")
     else
-      find(:all,
-           :conditions => ["fixed_version_id = ? AND updated_on > ? AND tracker_id in (?) and parent_id IS #{ find_impediments ? '' : 'NOT' } NULL", sprint_id, Time.parse(since), tracker],
-           :order => "updated_on ASC")
+      where("fixed_version_id = ? AND updated_on > ? AND tracker_id in (?) and parent_id IS #{ find_impediments ? '' : 'NOT' } NULL", sprint_id, Time.parse(since), tracker).
+      order("updated_on ASC")
     end
   end
 
@@ -122,11 +120,11 @@ class RbTask < Issue
 
   def update_blocked_list(for_blocking)
     # Existing relationships not in for_blocking should be removed from the 'blocks' list
-    relations_from.find(:all, :conditions => "relation_type='blocks'").each{ |ir|
+    relations_from.where("relation_type='blocks'").each{ |ir|
       ir.destroy unless for_blocking.include?( ir[:issue_to_id] )
     }
 
-    already_blocking = relations_from.find(:all, :conditions => "relation_type='blocks'").map{|ir| ir.issue_to_id}
+    already_blocking = relations_from.where("relation_type='blocks'").map{|ir| ir.issue_to_id}
 
     # Non-existing relationships that are in for_blocking should be added to the 'blocks' list
     for_blocking.select{ |id| !already_blocking.include?(id) }.each{ |id|
