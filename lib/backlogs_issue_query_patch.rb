@@ -53,28 +53,31 @@ module Backlogs
         @available_filters = available_filters_without_backlogs_issue_type
         return @available_filters if !show_backlogs_issue_items?(project)
 
+        backlogs_filters = ActiveSupport::OrderedHash.new
         if RbStory.trackers.length == 0 or RbTask.tracker.blank?
-          backlogs_filters = { }
+          # do nothing
         else
-          backlogs_filters = {
-            # mother of *&@&^*@^*#.... order "20" is a magical constant in RM2.2 which means "I'm a custom field". What. The. Fuck.
-            "backlogs_issue_type" => {  :type => :list,
-                                        :name => l(:field_backlogs_issue_type),
-                                        :values => [[l(:backlogs_story), "story"], [l(:backlogs_task), "task"], [l(:backlogs_impediment), "impediment"], [l(:backlogs_any), "any"]],
-                                        :order => 21 },
-            "story_points" => { :type => :float,
-                                :name => l(:field_story_points),
-                                :order => 22 }
-                             }
+          # mother of *&@&^*@^*#.... order "20" is a magical constant in RM2.2 which means "I'm a custom field". What. The. Fuck.
+          backlogs_filters['backlogs_issue_type'] = QueryFilter.new('backlogs_issue_type', {
+            :type => :list,
+            :name => l(:field_backlogs_issue_type),
+            :values => [[l(:backlogs_story), "story"], [l(:backlogs_task), "task"], [l(:backlogs_impediment), "impediment"], [l(:backlogs_any), "any"]],
+            :order => 21
+          })
+          backlogs_filters['story_points'] = QueryFilter.new('backlogs_issue_type', {
+            :name => l(:field_story_points),
+            :order => 22
+          })
         end
 
         if project
-          backlogs_filters["release_id"] = {
+
+          backlogs_filters['release_id'] = QueryFilter.new('release_id', {
             :type => :list_optional,
             :name => l(:field_release),
-            :values => RbRelease.where("project_id IN (?)", project).order('name ASC').collect { |d| [d.name, d.id.to_s]},
+            :values => RbRelease.where("project_id IN (?)", project).order('name ASC').collect {|d| [d.name, d.id.to_s]},
             :order => 21
-          }
+          })
         end
         @available_filters = @available_filters.merge(backlogs_filters)
       end
@@ -93,7 +96,7 @@ module Backlogs
         @available_columns << QueryColumn.new(:backlogs_issue_type)
       end
 
-      def sql_for_field_with_backlogs_issue_type(field, operator, value, db_table, db_field, is_custom_filter=false)
+      def sql_for_field_with_backlogs_issue_type(field, operator, value, db_table, db_field, is_custom_filter = false)
         return sql_for_field_without_backlogs_issue_type(field, operator, value, db_table, db_field, is_custom_filter) unless field == "backlogs_issue_type"
 
         db_table = Issue.table_name
@@ -103,10 +106,10 @@ module Backlogs
         selected_values = values_for(field)
         selected_values = ['story', 'task'] if selected_values.include?('any')
 
-        story_trackers = RbStory.trackers(:type=>:string)
-        all_trackers = (RbStory.trackers + [RbTask.tracker]).collect{|val| "#{val}"}.join(",")
+        story_trackers = RbStory.trackers(:type => :string)
+        all_trackers = (RbStory.trackers + [RbTask.tracker]).collect {|val| "#{val}"}.join(",")
 
-        selected_values.each { |val|
+        selected_values.each {|val|
           case val
             when "story"
               sql << "(#{db_table}.tracker_id in (#{story_trackers}))"
