@@ -1,6 +1,6 @@
 class RbServerVariablesController < RbApplicationController
   unloadable
-  protect_from_forgery except: :index
+  skip_before_action: :verify_authenticity_token
 
   # for index there's no @project
   # (eliminates the need of RbAllProjectsController)
