@@ -1,5 +1,6 @@
 class RbServerVariablesController < RbApplicationController
   unloadable
+  protect_from_forgery except: :index
 
   # for index there's no @project
   # (eliminates the need of RbAllProjectsController)
